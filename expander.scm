@@ -1131,7 +1131,7 @@
                              (cons (list #f #f (expand-program form)) forms)
                              syntax-defs
                              bound-variables))
-                      ((library)
+                      ((library define-library)
                        (loop (cdr ws)
                              (cons (list #f #f (expand-library form)) forms)
                              syntax-defs
@@ -2397,7 +2397,7 @@
     ;;===================================================================
 
     (define library-language-names
-      `(program library export import for run expand meta only
+      `(program define-library library export import for run expand meta only
                 except prefix rename primitives >= <= and or not))
 
     (define (make-library-language)
@@ -2459,9 +2459,10 @@
     ;; Import only the minimal library language into the toplevel:
 
     (env-import! toplevel-template (make-library-language) *toplevel-env*)
-    (register-macro! 'library (make-expander invalid-form))
-    (register-macro! 'program (make-expander invalid-form))
-    (register-macro! 'import  (make-expander invalid-form))
+    (register-macro! 'library         (make-expander invalid-form))
+    (register-macro! 'define-library  (make-expander invalid-form))
+    (register-macro! 'program         (make-expander invalid-form))
+    (register-macro! 'import          (make-expander invalid-form))
 
     ;;==========================================================================
     ;;
