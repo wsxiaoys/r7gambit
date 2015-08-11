@@ -1,15 +1,7 @@
-;;;===============================================================================
-;;;
-;;; MzScheme compatibility file:
-;;;
-;;; Uncomment the appropriate LOAD command in macros-core.scm
-;;;
-;;;===============================================================================
-
 ;; A numeric string that uniquely identifies this run in the universe
 
 ; (define (ex:unique-token) (number->string (time->seconds (current-time))))
-(define (ex:unique-token) 31)
+(define (ex:unique-token) "31")
 
 ;; The letrec black hole and corresponding setter.
 
@@ -94,5 +86,19 @@
           (lambda (x)
             (and (real-vector? x)
                  (not (eq? (vector-ref x 0) record-tag)))))))
+
+(define (eval expr env)
+  (let ((hook ##expand-source)
+        (c-hook c#expand-source)
+        (id (lambda (x) x)))
+    (dynamic-wind
+        (lambda ()
+          (set! ##expand-source id)
+          (set! c#expand-source id))
+        (lambda ()
+          (##eval expr))
+        (lambda ()
+          (set! ##expand-source hook)
+          (set! c#expand-source c-hook)))))
 
 
