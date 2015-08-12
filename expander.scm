@@ -1734,6 +1734,9 @@
          `((,x ,x 0)))
         (((syntax rename) ((? identifier? xs) (? identifier? ys)) ___)
          (map (lambda (x y) `(,y ,x 0)) xs ys))
+        ;; R7RS export rename
+        (((syntax rename) (? identifier? x) (? identifier? y))
+         `((,y ,x 0)))
         (- (syntax-violation 'export "Invalid export set" set))))
 
     ;; Returns

@@ -11,6 +11,7 @@
 
 (define (expand exp)
   (let ((expanded (ex:expand-r7rs (list exp))))
+;    (pp `(expanded ,expanded))
     (cond ((null? expanded) #!void)
           (else (car expanded)))))
 

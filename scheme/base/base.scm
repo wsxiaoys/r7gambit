@@ -238,7 +238,7 @@
     write-u8
     zero?)
   (import (gambit)
-          (core primitives)
+          (for (core primitives) expand run)
           (core derived)
           (rnrs control (6))
           (core let)
