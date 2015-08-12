@@ -63,6 +63,7 @@
 
 (define ex:register-library! #f)
 (define ex:lookup-library    #f)
+
 (let ((table '()))
   (set! ex:register-library!
         (lambda (library)
@@ -76,14 +77,57 @@
           (let ((library (assoc name table)))
             (if library
                 library
-                (assertion-violation 'lookup-library "Library not loaded" name)
+                ;; (assertion-violation 'lookup-library "Library not loaded" name)
                 ;; AUTOMATIC LOADING ON IMPORT OF LIBRARIES:
                 ;; Instead of assertion-violation, something like the following
                 ;; can be used to load libraries automatically
-                ;;(begin
-                ;;  (ex:load (library-name->filename name))
-                ;;  (ex:lookup-library name))
+                (begin
+                  (ex:load (ex:library-name->filename name))
+                  (ex:lookup-library name))
                 )))))
+
+;; Minimum library loading.
+(define ex:library-locations #f)
+(set! ex:library-locations
+      (list ""        ;; "" means current directory
+            "~~lib")) ;; lib directory in Gambit installation directory
+
+(define ex:library-kinds #f)
+(set! ex:library-kinds
+      (list ".sld" ".scm"))
+
+(define (ex:parts->path parts dir)
+  (if (null? (cdr parts))
+      (path-expand (symbol->string (car parts)) dir)
+      (ex:parts->path (cdr parts) (path-expand (symbol->string (car parts)) dir))))
+
+(define (ex:library-name->filename name)
+  (let loop1 ((dirs ex:library-locations))
+    (if (not (pair? dirs))
+        (error 'cannot-find-library name)
+        (let* ((dir (path-expand (car dirs)))
+               (partial-path
+                (ex:parts->path name dir)))
+          (let loop2 ((kinds ex:library-kinds))
+            (let ((ext (car kinds)))
+                  (define (try-path path)
+                    (let ((port
+                           (with-exception-catcher
+                            (lambda (exc)
+                              #f)
+                            (lambda ()
+                              (open-input-file path)))))
+                      (and port path)))
+
+                  (or (try-path
+                       (string-append (path-expand
+                                       (path-strip-directory partial-path)
+                                       partial-path)
+                                      ext))
+                      (try-path
+                       (string-append partial-path
+                                      ext))
+                      (loop2 (cdr kinds)))))))))
 
 ;; Only instantiate part of the bootstrap library
 ;; that would be needed for invocation at runtime.

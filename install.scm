@@ -9,10 +9,15 @@
   (ex:expand-r5rs-file "expander.scm" "expander.exp"
                        (ex:environment '(rnrs base))))
 
+(define (expand exp)
+  (let ((expanded (ex:expand-r7rs (list exp))))
+    (cond ((null? expanded) #!void)
+          (else (car expanded)))))
+
 (define (make-expander)
   (lambda (x)
     (let* ((exp (##desourcify x))
-           (expanded (car (ex:expand-r7rs (list exp))))
+           (expanded (expand exp))
            (result (##sourcify expanded x)))
       result)))
 
